@@ -39,7 +39,6 @@ function stopRecordingCallback() {
     recorder.microphone.stop();
 }
 
-var isEdge = navigator.userAgent.indexOf('Edge') !== -1 && (!!navigator.msSaveOrOpenBlob || !!navigator.msSaveBlob);
 var recorder; // globally accessible
 
 document.getElementById('btn-start-recording').onclick = function() {
@@ -52,7 +51,7 @@ document.getElementById('btn-start-recording').onclick = function() {
             type: 'audio',
             recorderType: StereoAudioRecorder, // this line is required for MS-Edge
             // sampleRate: 44100,
-            numberOfAudioChannels: isEdge ? 1 : 2,
+            numberOfAudioChannels: 1,
             // bufferSize: 16384
         });
 

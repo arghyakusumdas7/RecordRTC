@@ -1,9 +1,9 @@
 'use strict';
 
-// Last time updated: 2017-12-13 5:07:29 AM UTC
+// Last time updated: 2017-09-30 3:12:20 PM UTC
 
 // ________________
-// RecordRTC v5.4.6
+// RecordRTC v5.4.4
 
 // Open-Sourced: https://github.com/muaz-khan/RecordRTC
 
@@ -48,13 +48,7 @@ function RecordRTC(mediaStream, config) {
     // a reference to user's recordRTC object
     var self = this;
 
-    function startRecording(config2) {
-        if (!!config2) {
-            // allow users to set options using startRecording method
-            // config2 is similar to main "config" object (second parameter over RecordRTC constructor)
-            config = new RecordRTCConfiguration(mediaStream, config2);
-        }
-
+    function startRecording() {
         if (!config.disableLogs) {
             console.log('started recording ' + config.type + ' stream.');
         }
@@ -745,26 +739,10 @@ function RecordRTC(mediaStream, config) {
             setState('destroyed');
             returnObject = self = null;
 
-            if (Storage.AudioContextConstructor) {
-                Storage.AudioContextConstructor.close();
-                Storage.AudioContextConstructor = null;
-            }
-
             if (!disableLogs) {
                 console.warn('RecordRTC is destroyed.');
             }
-        },
-
-        /**
-         * RecordRTC version number
-         * @property {String} version - Release version number.
-         * @memberof RecordRTC
-         * @static
-         * @readonly
-         * @example
-         * alert(recorder.version);
-         */
-        version: '5.4.6'
+        }
     };
 
     if (!this) {
@@ -781,8 +759,6 @@ function RecordRTC(mediaStream, config) {
 
     return returnObject;
 }
-
-RecordRTC.version = '5.4.6';
 
 if (typeof module !== 'undefined' /* && !!module.exports*/ ) {
     module.exports = RecordRTC;
@@ -904,14 +880,6 @@ RecordRTC.writeToDisk = function(options) {
  */
 
 function RecordRTCConfiguration(mediaStream, config) {
-    if (!config.recorderType && !config.type) {
-        if (!!config.audio && !!config.video) {
-            config.type = 'video';
-        } else if (!!config.audio && !config.video) {
-            config.type = 'audio';
-        }
-    }
-
     if (config.recorderType && !config.type) {
         if (config.recorderType === WhammyRecorder || config.recorderType === CanvasRecorder) {
             config.type = 'video';
@@ -1705,8 +1673,7 @@ if (typeof navigator !== 'undefined' && typeof navigator.getUserMedia === 'undef
 
 var isEdge = navigator.userAgent.indexOf('Edge') !== -1 && (!!navigator.msSaveBlob || !!navigator.msSaveOrOpenBlob);
 var isOpera = !!window.opera || navigator.userAgent.indexOf('OPR/') !== -1;
-var isSafari = navigator.userAgent.toLowerCase().indexOf('safari/') > -1;
-var isChrome = (!isOpera && !isEdge && !!navigator.webkitGetUserMedia) || isElectron() || isSafari;
+var isChrome = (!isOpera && !isEdge && !!navigator.webkitGetUserMedia) || isElectron();
 
 var MediaStream = window.MediaStream;
 
@@ -2493,10 +2460,6 @@ function StereoAudioRecorder(mediaStream, config) {
         numberOfAudioChannels = 1;
     }
 
-    if (!numberOfAudioChannels || numberOfAudioChannels < 1) {
-        numberOfAudioChannels = 2;
-    }
-
     if (!config.disableLogs) {
         console.log('StereoAudioRecorder is set to record number of channels: ', numberOfAudioChannels);
     }
@@ -2539,14 +2502,19 @@ function StereoAudioRecorder(mediaStream, config) {
             throw 'Please make sure MediaStream is active.';
         }
 
-        resetVariables();
+        // reset the buffers for the new recording
+        leftchannel.length = rightchannel.length = 0;
+        recordingLength = 0;
+
+        if (audioInput) {
+            audioInput.connect(jsAudioNode);
+        }
+
+        // to prevent self audio to be connected with speakers
+        // jsAudioNode.connect(context.destination);
 
         isAudioProcessStarted = isPaused = false;
         recording = true;
-
-        if (typeof config.timeSlice !== 'undefined') {
-            looper();
-        }
     };
 
     function mergeLeftRightBuffers(config, callback) {
@@ -2563,7 +2531,6 @@ function StereoAudioRecorder(mediaStream, config) {
             if (numberOfAudioChannels === 2) {
                 leftBuffers = mergeBuffers(leftBuffers, internalInterleavedLength);
                 rightBuffers = mergeBuffers(rightBuffers, internalInterleavedLength);
-
                 if (desiredSampRate) {
                     leftBuffers = interpolateArray(leftBuffers, desiredSampRate, sampleRate);
                     rightBuffers = interpolateArray(rightBuffers, desiredSampRate, sampleRate);
@@ -2572,7 +2539,6 @@ function StereoAudioRecorder(mediaStream, config) {
 
             if (numberOfAudioChannels === 1) {
                 leftBuffers = mergeBuffers(leftBuffers, internalInterleavedLength);
-
                 if (desiredSampRate) {
                     leftBuffers = interpolateArray(leftBuffers, desiredSampRate, sampleRate);
                 }
@@ -2587,17 +2553,21 @@ function StereoAudioRecorder(mediaStream, config) {
             // http://stackoverflow.com/a/28977136/552182
             function interpolateArray(data, newSampleRate, oldSampleRate) {
                 var fitCount = Math.round(data.length * (newSampleRate / oldSampleRate));
+                //var newData = new Array();
                 var newData = [];
+                //var springFactor = new Number((data.length - 1) / (fitCount - 1));
                 var springFactor = Number((data.length - 1) / (fitCount - 1));
-                newData[0] = data[0];
+                newData[0] = data[0]; // for new allocation
                 for (var i = 1; i < fitCount - 1; i++) {
                     var tmp = i * springFactor;
+                    //var before = new Number(Math.floor(tmp)).toFixed();
+                    //var after = new Number(Math.ceil(tmp)).toFixed();
                     var before = Number(Math.floor(tmp)).toFixed();
                     var after = Number(Math.ceil(tmp)).toFixed();
                     var atPoint = tmp - before;
                     newData[i] = linearInterpolate(data[before], data[after], atPoint);
                 }
-                newData[fitCount - 1] = data[data.length - 1];
+                newData[fitCount - 1] = data[data.length - 1]; // for new allocation
                 return newData;
             }
 
@@ -2724,7 +2694,8 @@ function StereoAudioRecorder(mediaStream, config) {
             });
         }
 
-        if (isEdge || isOpera || isSafari || config.noWorker) {
+        if (!isChrome) {
+            // its Microsoft Edge
             mergeAudioBuffers(config, function(data) {
                 callback(data.buffer, data.view);
             });
@@ -2772,6 +2743,9 @@ function StereoAudioRecorder(mediaStream, config) {
         // stop recording
         recording = false;
 
+        // to make sure onaudioprocess stops firing
+        // audioInput.disconnect();
+
         mergeLeftRightBuffers({
             desiredSampRate: desiredSampRate,
             sampleRate: sampleRate,
@@ -2818,11 +2792,11 @@ function StereoAudioRecorder(mediaStream, config) {
             // recorded audio length
             self.length = recordingLength;
 
-            isAudioProcessStarted = false;
-
             if (callback) {
                 callback(self.blob);
             }
+
+            isAudioProcessStarted = false;
         });
     };
 
@@ -2870,7 +2844,7 @@ function StereoAudioRecorder(mediaStream, config) {
         throw 'WebAudio API has no support on this browser.';
     }
 
-    // connect the stream to the script processor
+    // connect the stream to the gain node
     audioInput.connect(jsAudioNode);
 
     if (!config.bufferSize) {
@@ -2964,30 +2938,13 @@ function StereoAudioRecorder(mediaStream, config) {
         clearRecordedDataCB();
     };
 
-    function resetVariables() {
-        leftchannel = [];
-        rightchannel = [];
+    function clearRecordedDataCB() {
+        leftchannel.length = rightchannel.length = 0;
         recordingLength = 0;
         isAudioProcessStarted = false;
         recording = false;
         isPaused = false;
-        context = null;
 
-        self.leftchannel = leftchannel;
-        self.rightchannel = rightchannel;
-        self.numberOfAudioChannels = numberOfAudioChannels;
-        self.desiredSampRate = desiredSampRate;
-        self.sampleRate = sampleRate;
-        self.recordingLength = recordingLength;
-
-        intervalsBasedBuffers = {
-            left: [],
-            right: [],
-            recordingLength: 0
-        };
-    }
-
-    function clearRecordedDataCB() {
         if (jsAudioNode) {
             jsAudioNode.onaudioprocess = null;
             jsAudioNode.disconnect();
@@ -2998,8 +2955,6 @@ function StereoAudioRecorder(mediaStream, config) {
             audioInput.disconnect();
             audioInput = null;
         }
-
-        resetVariables();
     }
 
     // for debugging
@@ -3024,10 +2979,7 @@ function StereoAudioRecorder(mediaStream, config) {
         }
 
         if (!recording) {
-            if (audioInput) {
-                audioInput.disconnect();
-                audioInput = null;
-            }
+            audioInput.disconnect();
             return;
         }
 
@@ -3052,28 +3004,17 @@ function StereoAudioRecorder(mediaStream, config) {
         var left = e.inputBuffer.getChannelData(0);
 
         // we clone the samples
-        var chLeft = new Float32Array(left);
-        leftchannel.push(chLeft);
+        leftchannel.push(new Float32Array(left));
 
         if (numberOfAudioChannels === 2) {
             var right = e.inputBuffer.getChannelData(1);
-            var chRight = new Float32Array(right);
-            rightchannel.push(chRight);
+            rightchannel.push(new Float32Array(right));
         }
 
         recordingLength += bufferSize;
 
         // export raw PCM
         self.recordingLength = recordingLength;
-
-        if (typeof config.timeSlice !== 'undefined') {
-            intervalsBasedBuffers.recordingLength += bufferSize;
-            intervalsBasedBuffers.left.push(chLeft);
-
-            if (numberOfAudioChannels === 2) {
-                intervalsBasedBuffers.right.push(chRight);
-            }
-        }
     }
 
     jsAudioNode.onaudioprocess = onAudioProcessDataAvailable;
@@ -3087,47 +3028,6 @@ function StereoAudioRecorder(mediaStream, config) {
     this.numberOfAudioChannels = numberOfAudioChannels;
     this.desiredSampRate = desiredSampRate;
     this.sampleRate = sampleRate;
-    self.recordingLength = recordingLength;
-
-    // helper for intervals based blobs
-    var intervalsBasedBuffers = {
-        left: [],
-        right: [],
-        recordingLength: 0
-    };
-
-    // this looper is used to support intervals based blobs (via timeSlice+ondataavailable)
-    function looper() {
-        if (!recording || typeof config.ondataavailable !== 'function' || typeof config.timeSlice === 'undefined') {
-            return;
-        }
-
-        if (intervalsBasedBuffers.left.length) {
-            mergeLeftRightBuffers({
-                desiredSampRate: desiredSampRate,
-                sampleRate: sampleRate,
-                numberOfAudioChannels: numberOfAudioChannels,
-                internalInterleavedLength: intervalsBasedBuffers.recordingLength,
-                leftBuffers: intervalsBasedBuffers.left,
-                rightBuffers: numberOfAudioChannels === 1 ? [] : intervalsBasedBuffers.right
-            }, function(buffer, view) {
-                var blob = new Blob([view], {
-                    type: 'audio/wav'
-                });
-                config.ondataavailable(blob);
-
-                setTimeout(looper, config.timeSlice);
-            });
-
-            intervalsBasedBuffers = {
-                left: [],
-                right: [],
-                recordingLength: 0
-            };
-        } else {
-            setTimeout(looper, config.timeSlice);
-        }
-    }
 }
 
 if (typeof RecordRTC !== 'undefined') {
@@ -3156,7 +3056,7 @@ if (typeof RecordRTC !== 'undefined') {
  */
 
 function CanvasRecorder(htmlElement, config) {
-    if (typeof html2canvas === 'undefined') {
+    if (typeof html2canvas === 'undefined' && htmlElement.nodeName.toLowerCase() !== 'canvas') {
         throw 'Please link: https://cdn.webrtc-experiment.com/screenshot.js';
     }
 
@@ -4470,7 +4370,7 @@ if (typeof RecordRTC !== 'undefined') {
  * @typedef GifRecorder
  * @class
  * @example
- * var recorder = new GifRecorder(mediaStream || canvas || context, { onGifPreview: function, onGifRecordingStarted: function, width: 1280, height: 720, frameRate: 200, quality: 10 });
+ * var recorder = new GifRecorder(mediaStream || canvas || context, { width: 1280, height: 720, frameRate: 200, quality: 10 });
  * recorder.record();
  * recorder.stop(function(blob) {
  *     img.src = URL.createObjectURL(blob);
@@ -4500,11 +4400,6 @@ function GifRecorder(mediaStream, config) {
      */
     this.record = function() {
         if (typeof GIFEncoder === 'undefined') {
-            setTimeout(self.record, 1000);
-            return;
-        }
-
-        if (!isLoadedMetaData) {
             setTimeout(self.record, 1000);
             return;
         }
@@ -4565,10 +4460,6 @@ function GifRecorder(mediaStream, config) {
         // Boolean start() 
         // This writes the GIF Header and returns false if it fails.
         gifEncoder.start();
-
-        if (typeof config.onGifRecordingStarted === 'function') {
-            config.onGifRecordingStarted();
-        }
 
         startTime = Date.now();
 
@@ -4717,17 +4608,10 @@ function GifRecorder(mediaStream, config) {
         }
     }
 
-    var isLoadedMetaData = true;
-
     if (!isHTMLObject) {
         var video = document.createElement('video');
         video.muted = true;
         video.autoplay = true;
-
-        isLoadedMetaData = false;
-        video.onloadedmetadata = function() {
-            isLoadedMetaData = true;
-        };
 
         setSrcObject(mediaStream, video);
 
