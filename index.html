@@ -76,7 +76,7 @@ captureScreen(function(screen) {
                                                               });
                                        }, 30 * 60 * 1000);
                             
-                            document.getElementById('butScreenShare').addEventListener('click',function() {
+                            document.getElementById('butStop').addEventListener('click',function() {
                                        recorder.stopRecording(function() {
                                                               var blob = recorder.getBlob();
                                                               document.querySelector('video').src = URL.createObjectURL(blob);
