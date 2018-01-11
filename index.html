@@ -70,11 +70,11 @@ captureScreen(function(screen) {
                                                               document.querySelector('video').muted = false;
                                                               [screen, camera].forEach(function(stream) {
                                                                                        stream.getVideoTracks().forEach(function(track) {
-                                                                                                                       if(document.getElementById("butStop").disabled == true)
+                                                                                                                       if(document.getElementById("butStop").disabled === true)
                                                                                                                        track.stop();
                                                                                                                        });
                                                                                        stream.getAudioTracks().forEach(function(track) {
-                                                                                                                       if(document.getElementById("butStop").disabled == true)
+                                                                                                                       if(document.getElementById("butStop").disabled === true)
                                                                                                                        track.stop();
                                                                                                                        });
                                                                                        })
