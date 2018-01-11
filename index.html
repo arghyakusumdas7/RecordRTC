@@ -21,7 +21,7 @@
 <script src="https://cdn.WebRTC-Experiment.com/getScreenId.js"></script>
 <script>
     function deactivateButton() {
-        document.getElementById(butStop).disabled = true;
+        document.getElementById("butStop").disabled = true;
     }
     function captureScreen(cb) {
         getScreenId(function (error, sourceId, screen_constraints) {
@@ -77,7 +77,7 @@ captureScreen(function(screen) {
                                                                                                                        });
                                                                                        })
                                                               });
-                                       }, 15 * 1000 || document.getElementById(butStop).disabled === true);
+                                       }, 15 * 1000 || document.getElementById("butStop").disabled === true);
                             });
               });
     </script>
