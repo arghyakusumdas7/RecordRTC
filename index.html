@@ -21,7 +21,7 @@
 <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 <script src="https://cdn.WebRTC-Experiment.com/getScreenId.js"></script>
 <script>
-    document.getElementById('butStart').addEventListener('click',function() {
+document.getElementById('butStart').addEventListener('click',function() {
     function captureScreen(cb) {
         getScreenId(function (error, sourceId, screen_constraints) {
                     navigator.mediaDevices.getUserMedia(screen_constraints).then(cb).catch(function(error) {
@@ -97,5 +97,5 @@ captureScreen(function(screen) {
                                        });
                             });
               });
-                                                        )};
+                                                     });
     </script>
