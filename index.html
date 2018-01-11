@@ -779,7 +779,7 @@
             function captureScreen(config) {
                 // Firefox screen capturing addon is open-sourced here: https://github.com/muaz-khan/Firefox-Extensions
                 // Google Chrome screen capturing extension is open-sourced here: https://github.com/muaz-khan/Chrome-Extensions/tree/master/desktopCapture
-
+		console.log("Inside Capture Screen"); //Line added by Arghya
                 window.getScreenId = function(chromeMediaSource, chromeMediaSourceId) {
                     var screenConstraints = {
                         audio: false,
@@ -829,6 +829,7 @@
                 }
 
                 window.postMessage('get-sourceId', '*');
+                console.log("Leaving Capture Screen"); //Line added by Arghya
             }
 
             function captureAudioPlusScreen(config) {
