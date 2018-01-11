@@ -13,6 +13,7 @@
     Video+Screen recording using RecordRTC
     (Requires <a href="https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk" target="_blank">THIS CHROME EXTENSION</a>)
 </h1>
+<button id="butStart">Start Recording</button>
 <button id="butStop">Stop Recording</button>
 <video controls autoplay></video>
 
@@ -59,7 +60,9 @@ captureScreen(function(screen) {
                                                      setSrcObject(s, document.querySelector('video'));
                                                      }
                                                      });
-                            recorder.startRecording();
+                            document.getElementById('butStop').addEventListener('click',function() {
+                                                                                recorder.startRecording();
+                                                                                });
                             setTimeout(function() {
                                        recorder.stopRecording(function() {
                                                               var blob = recorder.getBlob();
