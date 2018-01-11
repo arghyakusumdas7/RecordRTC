@@ -477,6 +477,7 @@
                 }
 
                 if(recordingMedia.value === 'record-audio') {
+                    console.log("Inside record-audio ");
                     captureAudio(commonConfig);
 
                     button.mediaCapturedCallback = function() {
@@ -520,6 +521,7 @@
                 }
 
                 if(recordingMedia.value === 'record-audio-plus-video') {
+                    console.log("Inside record-audio-plus-video");
                     captureAudioPlusVideo(commonConfig);
 
                     button.mediaCapturedCallback = function() {
@@ -634,7 +636,7 @@
                 }
 
                 if(recordingMedia.value === 'record-screen') {
-                    console.log("In record Screen")
+                    console.log("In record Screen");
                     captureScreen(commonConfig);
 
                     button.mediaCapturedCallback = function() {
@@ -676,6 +678,7 @@
                 // note: audio+tab is supported in Chrome 50+
                 // todo: add audio+tab recording
                 if(recordingMedia.value === 'record-audio-plus-screen') {
+                    console.log("Inside record-audio-plus-screen");
                     captureAudioPlusScreen(commonConfig);
 
                     button.mediaCapturedCallback = function() {
