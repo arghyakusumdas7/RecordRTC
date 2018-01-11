@@ -21,6 +21,7 @@
 <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 <script src="https://cdn.WebRTC-Experiment.com/getScreenId.js"></script>
 <script>
+    document.getElementById('butStop').addEventListener('click',function() {
     function captureScreen(cb) {
         getScreenId(function (error, sourceId, screen_constraints) {
                     navigator.mediaDevices.getUserMedia(screen_constraints).then(cb).catch(function(error) {
@@ -60,9 +61,9 @@ captureScreen(function(screen) {
                                                      setSrcObject(s, document.querySelector('video'));
                                                      }
                                                      });
-                            document.getElementById('butStop').addEventListener('click',function() {
-                                                                                recorder.startRecording();
-                                                                                });
+                            
+                                                    recorder.startRecording();
+                            
                             setTimeout(function() {
                                        recorder.stopRecording(function() {
                                                               var blob = recorder.getBlob();
@@ -96,4 +97,5 @@ captureScreen(function(screen) {
                                        });
                             });
               });
+                                                        )};
     </script>
