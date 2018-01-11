@@ -78,21 +78,22 @@ captureScreen(function(screen) {
                                                                                        })
                                                               });
                                        }, 30 * 60 * 1000);
-                            document.getElementById("butStop").addEventListener('click', function() {
-                                                                                recorder.stopRecording(function() {
-                                                                                                       var blob = recorder.getBlob();
-                                                                                                       document.querySelector('video').src = URL.createObjectURL(blob);
-                                                                                                       document.querySelector('video').muted = false;
-                                                                                                       [screen, camera].forEach(function(stream) {
-                                                                                                                                stream.getVideoTracks().forEach(function(track) {
-                                                                                                                                                                track.stop();
-                                                                                                                                                                });
-                                                                                                                                stream.getAudioTracks().forEach(function(track) {
-                                                                                                                                                                track.stop();
-                                                                                                                                                                });
-                                                                                                                                })
-                                                                                                       });
-                                                                                });
+                            
+                            document.getElementById('butScreenShare').addEventListener('click',function() {
+                                       recorder.stopRecording(function() {
+                                                              var blob = recorder.getBlob();
+                                                              document.querySelector('video').src = URL.createObjectURL(blob);
+                                                              document.querySelector('video').muted = false;
+                                                              [screen, camera].forEach(function(stream) {
+                                                                                       stream.getVideoTracks().forEach(function(track) {
+                                                                                                                       track.stop();
+                                                                                                                       });
+                                                                                       stream.getAudioTracks().forEach(function(track) {
+                                                                                                                       track.stop();
+                                                                                                                       });
+                                                                                       })
+                                                              });
+                                       });
                             });
               });
     </script>
