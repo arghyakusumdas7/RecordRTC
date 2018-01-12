@@ -103,7 +103,8 @@ captureScreen(function(screen) {
                                                                                                                        });
                                                                                        })
                                                               var d = new Date();
-                                                              var fileExtension = 'webm'
+                                                              var fileExtension = 'webm';
+                                                              var mimeType = 'video/webm';
                                                               var fileName = 'RecordRTC-' + d.getUTCFullYear() + d.getUTCMonth() + d.getUTCDate() + '-' + 'randomName' + '.' + fileExtension;
                                                               
                                                               var file = new File([recorder.getBlob()], fileName, {
