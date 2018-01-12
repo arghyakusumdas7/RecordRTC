@@ -53,12 +53,14 @@ captureScreen(function(screen) {
               keepStreamActive(screen);
               captureCamera(function(camera) {
                             keepStreamActive(camera);
-                            screen.width = window.screen.width;
-                            screen.height = window.screen.height;
-                            screen.fullcanvas = true;
+                            screen.width = window.screen.width*90/100;
+                            screen.height = window.screen.height*90/100;
+                            screen.top = 0;
+                            screen.left = 0;
+                            //screen.fullcanvas = true;
                             
-                            camera.width = 320;
-                            camera.height = 240;
+                            camera.width = window.screen.width/10; //320;
+                            camera.height = window.screen.width/10; //240;
                             camera.top = screen.height - camera.height;
                             camera.left = screen.width - camera.width;
                             
